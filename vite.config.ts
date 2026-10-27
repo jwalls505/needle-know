@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vitest/config';
 import { playwright } from '@vitest/browser-playwright';
@@ -20,6 +21,11 @@ export default defineConfig({
 			adapter: adapter()
 		})
 	],
+	resolve: {
+		alias: {
+			$lib: fileURLToPath(new URL('./src/lib', import.meta.url))
+		}
+	},
 	test: {
 		expect: { requireAssertions: true },
 		projects: [

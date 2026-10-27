@@ -5,9 +5,10 @@ type Props = {
     tattoo: Tattoo;
     isSaved: boolean;
     onToggleSave: (id: number) => void;
+    onAddToPlan: (id: number) => void;
 };
 
-let { tattoo, isSaved, onToggleSave }: Props = $props();
+let { tattoo, isSaved, onToggleSave, onAddToPlan }: Props = $props();
 </script>
 
 <article class="artwork">
@@ -34,6 +35,12 @@ let { tattoo, isSaved, onToggleSave }: Props = $props();
   </div>
 
   <div class="artwork-meta">
+  <button
+  class="add-to-plan"
+  onclick={() => onAddToPlan(tattoo.id)}
+>
+  + Add to a tattoo plan
+</button>
     <div>
       <h3>{tattoo.title}</h3>
       <p>{tattoo.artist} · {tattoo.neighborhood}</p>
@@ -154,4 +161,19 @@ let { tattoo, isSaved, onToggleSave }: Props = $props();
       transition: none;
     }
   }
+  .add-to-plan {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #c9c5bb;
+  background: transparent;
+  color: #343832;
+  cursor: pointer;
+  font-size: 12px;
+  text-align: left;
+}
+
+.add-to-plan:hover {
+  background: #e9e6dd;
+}
 </style>

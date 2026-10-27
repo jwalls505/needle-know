@@ -1,6 +1,10 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { tattoos } from '../lib/data/tattoos';
 	import TattooCard from '../lib/components/TattooCard.svelte';
+	import { onMount } from 'svelte';
+	import { getPlans, addArtworkToPlan } from '$lib/utils/planStorage';
+	import type { TattooPlan } from '$lib/data/plans';
 	const styles = [
 		'All styles',
 		'Fine Line',
@@ -41,6 +45,32 @@
 	function toggleSave(id: number) {
 		saved = saved.includes(id) ? saved.filter((item) => item !== id) : [...saved, id];
 	}
+	let plans = $state<TattooPlan[]>([]);
+	let selectedArtworkId = $state<number | null>(null);
+	let selectedPlanId = $state('');
+	let planMessage = $state('');
+	onMount(() => {
+		plans = getPlans();
+	});
+	function openPlanPicker(artworkId: number) {
+		plans = getPlans();
+		selectedArtworkId = artworkId;
+		selectedPlanId = '';
+		planMessage = '';
+	}
+
+	function addSelectedArtwork() {
+		if (selectedArtworkId === null || !selectedPlanId) return;
+
+		const success = addArtworkToPlan(selectedPlanId, selectedArtworkId);
+
+		if (success) {
+			planMessage = 'Artwork added to your tattoo plan.';
+			selectedArtworkId = null;
+		} else {
+			planMessage = 'Could not find that plan.';
+		}
+	}
 </script>
 
 <svelte:head>
@@ -50,13 +80,14 @@
 
 <div class="site-shell">
 	<header class="site-header">
-		<a class="wordmark" href="/" aria-label="Needle Know home">
+		<a class="wordmark" href={resolve('/')} aria-label="Needle Know home">
 			needle<span>know.</span>
 		</a>
 
 		<nav aria-label="Main navigation">
-			<a class="current" href="/">Discover</a>
-			<a href="#collection">The collection</a>
+			<a class="current" href={resolve('/')}>Discover</a>
+			<a href="#collection">The Collection</a>
+			<a href={resolve('/plan')}>Plan my tattoo</a>
 			<a href="#about">About</a>
 		</nav>
 
@@ -132,7 +163,12 @@
 			{#if filtered.length > 0}
 				<div class="masonry">
 					{#each filtered as tattoo (tattoo.id)}
-						<TattooCard {tattoo} isSaved={saved.includes(tattoo.id)} onToggleSave={toggleSave} />
+						<TattooCard
+							{tattoo}
+							isSaved={saved.includes(tattoo.id)}
+							onToggleSave={toggleSave}
+							onAddToPlan={openPlanPicker}
+						/>
 					{/each}
 				</div>
 			{:else}
@@ -156,13 +192,52 @@
 				the page reloads.
 			</p>
 		</section>
+
+		<!-- Tattoo plan selection modal -->
+		{#if selectedArtworkId !== null}
+			<div class="picker-backdrop">
+				<div class="plan-picker" role="dialog" aria-modal="true" aria-labelledby="picker-title">
+					<button
+						class="close-picker"
+						aria-label="Close plan picker"
+						onclick={() => (selectedArtworkId = null)}
+					>
+						✕
+					</button>
+
+					<p class="eyebrow">YOUR TATTOO WORKSPACE</p>
+					<h2 id="picker-title">Add to a plan</h2>
+
+					{#if plans.length === 0}
+						<p>You haven't created a tattoo plan yet.</p>
+						<a href={resolve('/plan')}>Create your first plan →</a>
+					{:else}
+						<label for="plan-select">Choose a tattoo plan</label>
+
+						<select id="plan-select" bind:value={selectedPlanId}>
+							<option value="">Select a plan</option>
+
+							{#each plans as plan (plan.id)}
+								<option value={plan.id}>{plan.title}</option>
+							{/each}
+						</select>
+
+						<button class="confirm-add" disabled={!selectedPlanId} onclick={addSelectedArtwork}>
+							Add artwork
+						</button>
+					{/if}
+				</div>
+			</div>
+		{/if}
+
+		{#if planMessage}
+			<p class="plan-message" role="status">
+				{planMessage}
+			</p>
+		{/if}
 	</main>
 
-	<footer>
-		<span class="wordmark">needle<span>know.</span></span>
-		<span>MADE FOR THE ART. STARTING IN PITTSBURGH.</span>
-		<span>© 2026 NEEDLE KNOW</span>
-	</footer>
+	<footer></footer>
 </div>
 
 <style>
@@ -504,4 +579,79 @@
 			scroll-behavior: auto;
 		}
 	}
+	
+/* Tattoo plan picker modal */
+
+.picker-backdrop {
+  position: fixed;
+  inset: 0;
+  background: #24252299;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.plan-picker {
+  position: relative;
+  width: min(100%, 460px);
+  background: #f2f0e9;
+  padding: 35px;
+}
+
+.plan-picker h2 {
+  font-size: 36px;
+  margin: 15px 0 25px;
+}
+
+.plan-picker label {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.plan-picker select {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #d7d3c9;
+  background: #e9e6dd;
+}
+
+.close-picker {
+  position: absolute;
+  right: 18px;
+  top: 15px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.confirm-add {
+  width: 100%;
+  margin-top: 20px;
+  padding: 15px;
+  border: 0;
+  background: #282a27;
+  color: #f2f0e9;
+  cursor: pointer;
+}
+
+.confirm-add:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.plan-message {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  z-index: 101;
+  padding: 16px 22px;
+  background: #282a27;
+  color: #f2f0e9;
+  font-size: 13px;
+}
+
 </style>

@@ -1,5 +1,12 @@
 {
 	"files.associations": {
 		"*.css": "tailwindcss"
+	},
+	"chat.tools.terminal.autoApprove": {
+		"/^npm run check$/": {
+			"approve": true,
+			"matchCommandLine": true
+		},
+		"npm.cmd": true
 	}
 }
