@@ -62,11 +62,13 @@
 	function addSelectedArtwork() {
 		if (selectedArtworkId === null || !selectedPlanId) return;
 
-		const success = addArtworkToPlan(selectedPlanId, selectedArtworkId);
+		const result = addArtworkToPlan(selectedPlanId, selectedArtworkId);
 
-		if (success) {
+		if (result === 'added') {
 			planMessage = 'Artwork added to your tattoo plan.';
 			selectedArtworkId = null;
+		} else if (result === 'duplicate') {
+			planMessage = 'That artwork is already in your tattoo plan.';
 		} else {
 			planMessage = 'Could not find that plan.';
 		}
@@ -81,7 +83,7 @@
 <div class="site-shell">
 	<header class="site-header">
 		<a class="wordmark" href={resolve('/')} aria-label="Needle Know home">
-			needle<span>know.</span>
+			needle<span>Know</span>
 		</a>
 
 		<nav aria-label="Main navigation">
@@ -91,27 +93,25 @@
 			<a href="#about">About</a>
 		</nav>
 
-		<span class="location-label">PITTSBURGH, PA <span class="location-dot">●</span></span>
+		<span class="location-label">PITTSBURGH, PA</span>
 	</header>
 
 	<main>
 		<section class="hero" id="about">
 			<div class="hero-main">
 				<p class="eyebrow">AN INDEPENDENT TATTOO DISCOVERY PROJECT · EST. 2026</p>
-				<h1>Good art is<br /><em>worth finding.</em></h1>
+				<h1 class="signature-title">needle<span>Know</span></h1>
+				<p class="hero-heading">Good art is <em>worth finding.</em></p>
 				<p class="hero-description">
 					A considered collection of tattoo art and the people behind it. Discover your style. Find
 					your artist. Start somewhere local.
 				</p>
-				<a class="hero-link" href="#collection"
-					>Explore the collection <span aria-hidden="true">↗</span></a
-				>
+				<a class="hero-link" href="#collection">Explore the collection</a>
 			</div>
 
 			<aside class="hero-aside">
-				<span class="aside-mark" aria-hidden="true">✳</span>
-				<p>THE ART IS PERSONAL.<br />THE SEARCH SHOULD BE TOO.</p>
-				<span class="issue">ISSUE NO. 001 / PITTSBURGH</span>
+				<p class="aside-message">The art is personal.<br />The search should be too.</p>
+				<span class="issue">INDEPENDENT TATTOO DISCOVERY · PITTSBURGH</span>
 			</aside>
 		</section>
 
@@ -129,7 +129,6 @@
 			<div class="filter-bar">
 				<label class="search-field">
 					<span class="sr-only">Search tattoos</span>
-					<span aria-hidden="true">⌕</span>
 					<input bind:value={query} placeholder="Search artwork, styles, artists..." />
 				</label>
 
@@ -173,7 +172,6 @@
 				</div>
 			{:else}
 				<div class="empty-state">
-					<span>✳</span>
 					<h3>Nothing in this corner of the archive.</h3>
 					<p>Try another style, neighborhood, or search term.</p>
 					<button
@@ -202,7 +200,7 @@
 						aria-label="Close plan picker"
 						onclick={() => (selectedArtworkId = null)}
 					>
-						✕
+						Close
 					</button>
 
 					<p class="eyebrow">YOUR TATTOO WORKSPACE</p>
@@ -210,7 +208,7 @@
 
 					{#if plans.length === 0}
 						<p>You haven't created a tattoo plan yet.</p>
-						<a href={resolve('/plan')}>Create your first plan →</a>
+						<a href={resolve('/plan')}>Create your first plan</a>
 					{:else}
 						<label for="plan-select">Choose a tattoo plan</label>
 
@@ -280,16 +278,15 @@
 	}
 	.wordmark {
 		color: #242522;
-		font-family: Georgia, serif;
-		font-size: 29px;
-		letter-spacing: -1.8px;
+		font-family: 'Segoe Script', 'Bradley Hand', 'Apple Chancery', cursive;
+		font-size: 26px;
+		letter-spacing: -1.2px;
 		text-decoration: none;
-		font-weight: bold;
+		font-weight: 500;
 		white-space: nowrap;
 	}
 	.wordmark span {
-		font-style: italic;
-		font-weight: normal;
+		color: #9c5848;
 	}
 	nav {
 		display: flex;
@@ -308,15 +305,10 @@
 	.eyebrow,
 	.issue,
 	.results-heading,
-	.study-label,
 	footer {
 		font-size: 10px;
 		letter-spacing: 1.5px;
 		font-weight: 600;
-	}
-	.location-dot {
-		color: #9c5848;
-		margin-left: 6px;
 	}
 	.hero {
 		display: grid;
@@ -336,20 +328,34 @@
 	p {
 		margin-top: 0;
 	}
-	h1,
 	h2 {
 		font-family: Georgia, 'Times New Roman', serif;
 		font-weight: normal;
 	}
-	h1 {
-		font-size: clamp(55px, 7vw, 105px);
-		line-height: 0.99;
-		letter-spacing: -5px;
-		margin: 34px 0 25px;
+	.signature-title {
+		width: fit-content;
+		font-family: 'Segoe Script', 'Bradley Hand', 'Apple Chancery', cursive;
+		font-size: clamp(68px, 9.5vw, 136px);
+		font-weight: 500;
+		line-height: 1.15;
+		letter-spacing: -6px;
+		margin: 42px 0 4px -8px;
+		clip-path: inset(0 100% 0 0);
+		animation: signature-reveal 1.45s cubic-bezier(0.65, 0, 0.35, 1) 0.15s forwards;
 	}
-	h1 em {
-		font-weight: normal;
+	.signature-title span {
+		color: #9c5848;
+	}
+	.hero-heading {
+		font-family: Georgia, 'Times New Roman', serif;
+		font-size: clamp(29px, 3.2vw, 43px);
+		line-height: 1.2;
+		letter-spacing: -1.4px;
+		margin: 0 0 22px;
+	}
+	.hero-heading em {
 		color: #767c70;
+		font-weight: normal;
 	}
 	.hero-description {
 		max-width: 430px;
@@ -360,36 +366,34 @@
 	.hero-link {
 		display: inline-block;
 		margin-top: 24px;
-		border-bottom: 1px solid #242522;
-		padding-bottom: 9px;
+		border-bottom: 1px solid #9c5848;
+		padding-bottom: 7px;
 		color: #242522;
 		text-decoration: none;
 		font-size: 13px;
 	}
-	.hero-link span {
-		margin-left: 25px;
+	.hero-link:hover {
+		color: #9c5848;
 	}
 	.hero-aside {
-		background: #282a27;
-		color: #e8e4db;
-		padding: 45px;
+		color: #242522;
+		padding: 45px 8% 45px 12%;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
+		align-self: center;
+		min-height: 285px;
+		border-left: 1px solid #d9d6ce;
 	}
-	.aside-mark {
-		font-size: 110px;
-		color: #aaa99b;
-		line-height: 1;
-	}
-	.hero-aside p {
+	.aside-message {
 		font-family: Georgia, serif;
 		font-size: clamp(23px, 3vw, 38px);
 		line-height: 1.2;
-		letter-spacing: -1px;
+		letter-spacing: -1.3px;
 	}
 	.issue {
-		color: #a7a69e;
+		color: #777971;
+		line-height: 1.6;
 	}
 	.discovery {
 		padding: 65px 5% 90px;
@@ -422,16 +426,13 @@
 	}
 	.search-field,
 	.select-field {
-		background: #e9e6dd;
+		background: #f8f6f1;
 		border: 1px solid #d7d3c9;
+		border-radius: 999px;
 		display: flex;
 		align-items: center;
 		min-height: 52px;
 		padding: 0 18px;
-	}
-	.search-field span {
-		font-size: 26px;
-		margin-right: 12px;
 	}
 	input,
 	select {
@@ -452,7 +453,7 @@
 		border: 1px solid #d1cdc3;
 		background: transparent;
 		color: #6a6c64;
-		border-radius: 0;
+		border-radius: 999px;
 		padding: 10px 16px;
 		font-size: 12px;
 		cursor: pointer;
@@ -471,16 +472,15 @@
 		color: #777971;
 	}
 	.masonry {
-		columns: 4 220px;
-		column-gap: 22px;
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 42px 22px;
 	}
 	.empty-state {
 		text-align: center;
 		padding: 90px 20px;
-		border: 1px solid #d5d1c8;
-	}
-	.empty-state > span {
-		font-size: 60px;
+		border-top: 1px solid #d5d1c8;
+		border-bottom: 1px solid #d5d1c8;
 	}
 	.empty-state h3 {
 		font-family: Georgia, serif;
@@ -494,11 +494,12 @@
 	}
 	.empty-state button {
 		margin-top: 15px;
-		padding: 12px 20px;
-		background: #242522;
-		color: white;
+		padding: 9px 0;
+		background: transparent;
+		color: #9c5848;
 		border: 0;
 		cursor: pointer;
+		border-bottom: 1px solid currentColor;
 	}
 	.prototype-note {
 		color: #85877e;
@@ -515,24 +516,21 @@
 		gap: 20px;
 		color: #777971;
 	}
-	footer .wordmark {
-		font-size: 22px;
-	}
 	@media (max-width: 850px) {
 		.hero {
 			grid-template-columns: 1fr;
 		}
 		.hero-aside {
-			min-height: 230px;
+			min-height: 180px;
+			padding: 30px 6%;
+			border-left: 0;
+			border-top: 1px solid #d9d6ce;
 		}
-		.aside-mark {
-			font-size: 65px;
-		}
-		.hero-aside p {
+		.aside-message {
 			max-width: 300px;
 		}
-		h1 {
-			letter-spacing: -3px;
+		.signature-title {
+			letter-spacing: -4px;
 		}
 		.location-label {
 			display: none;
@@ -540,6 +538,10 @@
 		.section-heading {
 			align-items: start;
 			flex-direction: column;
+		}
+		.masonry {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 32px 16px;
 		}
 	}
 	@media (max-width: 600px) {
@@ -560,12 +562,19 @@
 		.hero-aside {
 			padding: 28px;
 		}
+		.signature-title {
+			font-size: clamp(42px, 14vw, 54px);
+			letter-spacing: -4px;
+			margin-left: -4px;
+		}
+		.hero-heading {
+			font-size: 29px;
+		}
 		.filter-bar {
 			grid-template-columns: 1fr;
 		}
 		.masonry {
-			columns: 2 130px;
-			column-gap: 12px;
+			gap: 26px 12px;
 		}
 		.results-heading span:last-child {
 			display: none;
@@ -578,80 +587,94 @@
 		:global(html) {
 			scroll-behavior: auto;
 		}
+		.signature-title {
+			clip-path: none;
+			animation: none;
+		}
 	}
-	
-/* Tattoo plan picker modal */
 
-.picker-backdrop {
-  position: fixed;
-  inset: 0;
-  background: #24252299;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-  padding: 20px;
-}
+	@keyframes signature-reveal {
+		to {
+			clip-path: inset(0 0 0 0);
+		}
+	}
 
-.plan-picker {
-  position: relative;
-  width: min(100%, 460px);
-  background: #f2f0e9;
-  padding: 35px;
-}
+	/* Tattoo plan picker modal */
 
-.plan-picker h2 {
-  font-size: 36px;
-  margin: 15px 0 25px;
-}
+	.picker-backdrop {
+		position: fixed;
+		inset: 0;
+		background: #24252299;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		z-index: 100;
+		padding: 20px;
+	}
 
-.plan-picker label {
-  display: block;
-  font-size: 12px;
-  margin-bottom: 10px;
-}
+	.plan-picker {
+		position: relative;
+		width: min(100%, 460px);
+		background: #f2f0e9;
+		padding: 35px;
+		border-radius: 20px;
+		box-shadow: 0 24px 80px #17181526;
+	}
 
-.plan-picker select {
-  width: 100%;
-  padding: 14px;
-  border: 1px solid #d7d3c9;
-  background: #e9e6dd;
-}
+	.plan-picker h2 {
+		font-size: 36px;
+		margin: 15px 0 25px;
+	}
 
-.close-picker {
-  position: absolute;
-  right: 18px;
-  top: 15px;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  font-size: 18px;
-}
+	.plan-picker label {
+		display: block;
+		font-size: 12px;
+		margin-bottom: 10px;
+	}
 
-.confirm-add {
-  width: 100%;
-  margin-top: 20px;
-  padding: 15px;
-  border: 0;
-  background: #282a27;
-  color: #f2f0e9;
-  cursor: pointer;
-}
+	.plan-picker select {
+		width: 100%;
+		padding: 14px;
+		border: 1px solid #d7d3c9;
+		background: #e9e6dd;
+		border-radius: 10px;
+	}
 
-.confirm-add:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+	.close-picker {
+		position: absolute;
+		right: 18px;
+		top: 15px;
+		border: 0;
+		background: transparent;
+		cursor: pointer;
+		font-size: 18px;
+	}
 
-.plan-message {
-  position: fixed;
-  bottom: 25px;
-  right: 25px;
-  z-index: 101;
-  padding: 16px 22px;
-  background: #282a27;
-  color: #f2f0e9;
-  font-size: 13px;
-}
+	.confirm-add {
+		width: 100%;
+		margin-top: 20px;
+		padding: 15px;
+		border: 0;
+		background: #282a27;
+		color: #f2f0e9;
+		border-radius: 999px;
+		cursor: pointer;
+	}
 
+	.confirm-add:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.plan-message {
+		position: fixed;
+		bottom: 25px;
+		right: 25px;
+		z-index: 101;
+		padding: 16px 22px;
+		background: #282a27;
+		color: #f2f0e9;
+		font-size: 13px;
+		border-radius: 999px;
+	}
 </style>

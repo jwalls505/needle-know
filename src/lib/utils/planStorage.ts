@@ -37,16 +37,42 @@ export function savePlans(plans: TattooPlan[]): void {
 export function addArtworkToPlan(
   planId: string,
   artworkId: number
-): boolean {
+): 'added' | 'duplicate' | 'not-found' {
   const plans = getPlans();
   const plan = plans.find((item) => item.id === planId);
 
-  if (!plan) return false;
+  if (!plan) return 'not-found';
 
-  if (!plan.artworkIds.includes(artworkId)) {
-    plan.artworkIds.push(artworkId);
-    savePlans(plans);
+  if (plan.artworkIds.includes(artworkId)) {
+    return 'duplicate';
   }
 
-  return true;
+  plan.artworkIds.push(artworkId);
+  savePlans(plans);
+
+  return 'added';
+}
+
+export function removeArtworkFromPlan(
+  planId: string,
+  artworkId: number
+): TattooPlan[] {
+  const plans = getPlans();
+
+  const updatedPlans = plans.map((plan) => {
+    if (plan.id !== planId) {
+      return plan;
+    }
+
+    return {
+      ...plan,
+      artworkIds: plan.artworkIds.filter(
+        (id) => id !== artworkId
+      )
+    };
+  });
+
+  savePlans(updatedPlans);
+
+  return updatedPlans;
 }
